@@ -33,8 +33,17 @@ sub run {
     # ...
     # Вычисление количества вохождений строки $substr в строку $str,
     # ...
-
+	my $pos = 0;
+	while (index($str, $substr, $pos) != (-1))
+	{
+		$num += 1;
+		$pos= index($str, $substr, $pos)+length($substr);
+	}
     print "$num\n";
 }
 
+run ("aaaa", "aa");
+run ("aaaa", "a");
+run ("abcab", "ab");
+run ("ab", "c");
 1;

@@ -29,9 +29,25 @@ sub run {
         # ...
         # Проверка, что число простое
         # ...
-
-	print "$i\n";
+	
+		my $flag=0;
+		for (my $j=2; $j < $i; $j++)
+		{
+			if ($i%$j==0)
+			{
+				$flag=1;
+			}
+		}	
+		if ($i>1 and $flag==0) 
+		{
+			print "$i\n";
+		}
     }
 }
+
+run (0,1);
+run (1,4);
+print "------\n";
+run (1,20);
 
 1;

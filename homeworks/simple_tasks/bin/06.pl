@@ -10,8 +10,8 @@ use warnings;
 
 =head1 encode ($str, $key)
 
-Функция шифрования ASCII строки $str ключем $key.
-Пачатает зашифрованную строку $encoded_str в формате "$encoded_str\n"
+Функция шифрования ASCII строки $str ключом $key.
+Пeчатает зашифрованную строку $encoded_str в формате "$encoded_str\n"
 
 Пример:
 
@@ -26,14 +26,24 @@ sub encode {
     # ...
     # Алгоритм шифрования
     # ...
-
+	my @asc = unpack ("C*",$str);
+	for (@asc)
+	{
+		$_=$_+$key;
+	}
+	$encoded_str = pack("C*", @asc);
     print "$encoded_str\n";
 }
 
+encode('#abc',1);
+encode('#abc',2);
+encode('zzz',1);
+encode('Howto learn perl?',25);
+
 =head1 decode ($encoded_str, $key)
 
-Функция дешифрования ASCII строки $encoded_str ключем $key.
-Пачатает дешифрованную строку $str в формате "$str\n"
+Функция дешифрования ASCII строки $encoded_str ключом $key.
+Печатает дешифрованную строку $str в формате "$str\n"
 
 Пример:
 
@@ -48,8 +58,15 @@ sub decode {
     # ...
     # Алгоритм дешифрования
     # ...
-
+	my @asc = unpack ("C*",$encoded_str);
+	for (@asc)
+	{
+		$_=$_-$key;
+	}
+	$str = pack("C*", @asc);
     print "$str\n";
 }
+
+decode ('$bcd',1);
 
 1;
