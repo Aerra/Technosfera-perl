@@ -29,7 +29,7 @@ sub encode {
 	my @asc = unpack ("C*",$str);
 	for (@asc)
 	{
-		$_=$_+$key;
+		$_=($_+$key)%128;
 	}
 	$encoded_str = pack("C*", @asc);
     print "$encoded_str\n";
@@ -61,7 +61,7 @@ sub decode {
 	my @asc = unpack ("C*",$encoded_str);
 	for (@asc)
 	{
-		$_=$_-$key;
+		$_=($_-$key)%128;
 	}
 	$str = pack("C*", @asc);
     print "$str\n";
