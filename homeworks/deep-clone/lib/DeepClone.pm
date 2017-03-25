@@ -35,124 +35,77 @@ use Data::Dumper;
 Элементами ссылок на массив или хеш, не могут быть ссылки на массивы и хеши исходной структуры данных.
 
 =cut
-
-our $refs={};  #хэш для циклических ссылок
-
-sub clone {
+my %refs={};
+sub clone_if
+{
 	my $orig = shift;
-	my $cloned;
-	# ...
-	# deep clone algorith here
-	# ...
-	if (wantarray)
+	my $x;
+	if (ref($orig) eq "")
 	{
-		die "Error in input data. It is not scalar!\n";
+		$x=clone_scalar($orig);
 	}
-	elsif (defined wantarray)
+	elsif (ref($orig) eq "ARRAY")
 	{
-		if (ref($orig) eq "")
+		$x=clone_mas($orig);
+	}
+	elsif (ref($orig) eq "HASH")
+	{
+		$x=clone_hash($orig);
+	}
+	else 
+	{
+		$x=undef;
+	}
+	return $x;
+}
+
+sub clone_mas
+{
+	my $orig = shift;
+	my @new_mas=();
+	for my $x (@{$orig})
+	{
+		my $y;
+		if ($refs{$x})
 		{
-			$cloned=$orig;
+			$x=$refs{$x};
 		}
-		elsif (ref($orig) eq "ARRAY")
+		else
 		{
-			my @new_mas=();
-			foreach my $x (@{$orig})
-			{
-				if ($refs->{$x})
-				{
-					push (@new_mas, $refs->{$x});
-				}
-				else
-				{
-					if (ref($x) eq "")
-					{
-						push(@new_mas,$x);	
-					}
-					elsif (ref($x) eq "ARRAY")
-					{
-						my @new_mas_1=();
-						foreach my $y (@{$x})
-						{
-							if (!(ref($y) eq ""))
-							{
-								$y=clone($y);
-							}
-							push(@new_mas_1,$y);
-						}
-						push (@new_mas,\@new_mas_1);
-						$refs->{$x}=\@new_mas_1;
-					}
-					elsif (ref($x) eq "HASH")
-					{
-						my %new_hash_1;
-						while (my($key, $value)=each (%{$x}))
-						{
-							if (!(ref($value) eq ""))
-							{
-								$value=clone($value);
-							}
-							$new_hash_1{$key}=$value;
-						}
-						push(@new_mas, \%new_hash_1);
-						$refs->{$x}=\%new_hash_1;
-					}
-				}
-			}
-			$cloned=\@new_mas;
+			$y=clone_if($x);
+			$refs{$x}=$y;
 		}
-		elsif (ref($orig) eq "HASH")
-		{
-			my @new_hash=();
-			while (my($key, $value)=each (%{$orig}))
-			{
-					if ($refs->{$value})
-					{
-						push(@new_hash,$refs->{$value});
-					}
-					else
-					{
-						if (ref($value) eq "")
-						{
-							push(@new_hash,$value);
-						}
-						elsif (ref($value) eq "ARRAY")
-						{
-							my @new_mas_1=();
-							foreach my $y (@{$value})
-							{
-								if (!(ref($y) eq ""))
-								{
-									$y=clone($y);
-								}
-								push(@new_mas_1,$y);
-							}
-							push(@new_hash,\@new_mas_1);
-							$refs->{$value}=\@new_mas_1;
-						}
-						elsif (ref($value) eq "HASH")
-						{
-							my %new_hash_1={};
-							while (my($key, $value1)=each (%{$value}))
-							{
-								if (!(ref($value1) eq ""))
-								{
-									$value1=clone($value1);
-								}
-								$new_hash_1{$key}=$value1;
-							}	
-							push(@new_hash,\%new_hash_1);
-							$refs->{$value}=\%new_hash_1;
-						}
-					}
-			}
-			my %new_hash=@new_hash;	
-			$cloned=\%new_hash;
-		}
-		else 
-		{
-			die "Error in input data.\n";
-		}
+		push (@new_mas,$y);
+	}
+	return \@new_mas;
+}
+
+sub clone_hash
+{
+	my $orig = shift;
+	my %new_hash={};
+	for (my($key, $value)=each (%{$orig}))
+	{
+		$value=clone_if($value);
+		$new_hash{$key}=$value;
+	}
+	return \%new_hash;
+}
+
+sub clone_scalar
+{
+	my $orig = shift;
+	return $orig;
+}
+
+
+sub clone
+{
+	my $orig=shift;
+	my $cloned;
+	if (defined wantarray)
+	{
+		$cloned=clone_if($orig);
 	}
 	else
 	{
