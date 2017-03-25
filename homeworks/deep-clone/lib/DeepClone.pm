@@ -35,21 +35,25 @@ use Data::Dumper;
 Элементами ссылок на массив или хеш, не могут быть ссылки на массивы и хеши исходной структуры данных.
 
 =cut
-my %refs={};
+my %refs;
 sub clone_if
 {
+	printf "hah\n";
 	my $orig = shift;
 	my $x;
 	if (ref($orig) eq "")
 	{
+		printf "it's scal\n";
 		$x=clone_scalar($orig);
 	}
 	elsif (ref($orig) eq "ARRAY")
 	{
+		printf "it's mas\n";
 		$x=clone_mas($orig);
 	}
 	elsif (ref($orig) eq "HASH")
 	{
+		printf "it's HASH\n";
 		$x=clone_hash($orig);
 	}
 	else 
@@ -83,11 +87,19 @@ sub clone_mas
 sub clone_hash
 {
 	my $orig = shift;
-	my %new_hash={};
-	for (my($key, $value)=each (%{$orig}))
+	my %new_hash;
+	while (my($key, $value)=each (%{$orig}))
 	{
-		$value=clone_if($value);
-		$new_hash{$key}=$value;
+		printf "$key\n";
+		if ($refs{$value})
+		{
+			$new_hash{$value}=$refs{$value};
+		}
+		else
+		{
+			my $y=clone_if($value);
+			$new_hash{$key}=$y;
+		}
 	}
 	return \%new_hash;
 }
@@ -101,6 +113,7 @@ sub clone_scalar
 
 sub clone
 {
+	printf "Yes!\n";
 	my $orig=shift;
 	my $cloned;
 	if (defined wantarray)
