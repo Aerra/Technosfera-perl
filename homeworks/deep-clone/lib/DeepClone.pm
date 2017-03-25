@@ -38,22 +38,18 @@ use Data::Dumper;
 my %refs;
 sub clone_if
 {
-	printf "hah\n";
 	my $orig = shift;
 	my $x;
 	if (ref($orig) eq "")
 	{
-		printf "it's scal\n";
 		$x=clone_scalar($orig);
 	}
 	elsif (ref($orig) eq "ARRAY")
 	{
-		printf "it's mas\n";
 		$x=clone_mas($orig);
 	}
 	elsif (ref($orig) eq "HASH")
 	{
-		printf "it's HASH\n";
 		$x=clone_hash($orig);
 	}
 	else 
@@ -90,7 +86,6 @@ sub clone_hash
 	my %new_hash;
 	while (my($key, $value)=each (%{$orig}))
 	{
-		printf "$key\n";
 		if ($refs{$value})
 		{
 			$new_hash{$value}=$refs{$value};
@@ -113,7 +108,6 @@ sub clone_scalar
 
 sub clone
 {
-	printf "Yes!\n";
 	my $orig=shift;
 	my $cloned;
 	if (defined wantarray)
