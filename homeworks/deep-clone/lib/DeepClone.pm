@@ -35,65 +35,106 @@ use Data::Dumper;
 Элементами ссылок на массив или хеш, не могут быть ссылки на массивы и хеши исходной структуры данных.
 
 =cut
-my %refs;
+
 sub clone_if
 {
 	my $orig = shift;
+	my $refs = shift;
 	my $x;
 	if (ref($orig) eq "")
 	{
-		$x=clone_scalar($orig);
+		$x = clone_scalar($orig);
 	}
 	elsif (ref($orig) eq "ARRAY")
 	{
-		$x=clone_mas($orig);
+		$x = clone_arr($orig,$refs);
 	}
 	elsif (ref($orig) eq "HASH")
 	{
-		$x=clone_hash($orig);
+		$x = clone_hash($orig,$refs);
+	}
+	elsif (ref($orig)) 
+	{
+		die undef;
 	}
 	else 
 	{
-		$x=undef;
+		$x = undef;		
 	}
 	return $x;
 }
 
-sub clone_mas
+sub clone_arr
 {
 	my $orig = shift;
-	my @new_mas=();
-	for my $x (@{$orig})
+	my $refs = shift;
+	my @new_arr = ();
+	for my $x (@{$orig}) 
 	{
 		my $y;
-		if ($refs{$x})
+		if (ref($x) and $refs->{$x})
 		{
-			$x=$refs{$x};
+			push (@new_arr,$refs->{$x});
 		}
 		else
 		{
-			$y=clone_if($x);
-			$refs{$x}=$y;
+			if (ref($x))
+			{
+				if ($x == $orig)
+				{
+					$refs->{$x} = \@new_arr;
+					push (@new_arr,$refs->{$x});
+				}
+				else
+				{
+					$y = clone_if($x,$refs);
+					$refs->{$x}=$y;
+					push (@new_arr,$y);
+				}	
+			}
+			else
+			{
+				$y = clone_if($x,$refs);
+				push (@new_arr,$y);				
+			}
 		}
-		push (@new_mas,$y);
 	}
-	return \@new_mas;
+	return \@new_arr;
 }
 
 sub clone_hash
 {
 	my $orig = shift;
-	my %new_hash;
-	while (my($key, $value)=each (%{$orig}))
+	my $refs = shift;
+	my %new_hash = ();
+	while (my($key, $value) = each (%{$orig}))
 	{
-		if ($refs{$value})
+		my $y;
+		if (ref($value) and $refs->{$value})
 		{
-			$new_hash{$value}=$refs{$value};
+			$new_hash{$key} = $refs->{$value};
 		}
 		else
 		{
-			my $y=clone_if($value);
-			$new_hash{$key}=$y;
+			if (ref($value))
+			{
+				if ($value == $orig)
+				{
+					$refs->{$value} = \%new_hash;
+					$new_hash{$key} = $refs->{$value};		
+				}
+				else
+				{
+					$y = clone_if($value,$refs);
+					$refs->{$value} = $y;
+					$new_hash{$key} = $y;
+				}
+			}
+			else
+			{
+				$y = clone_if($value,$refs);
+				$new_hash{$key} = $y;
+			}
 		}
 	}
 	return \%new_hash;
@@ -105,20 +146,22 @@ sub clone_scalar
 	return $orig;
 }
 
-
 sub clone
 {
-	my $orig=shift;
+	my %refs;
+	my $orig = shift;
 	my $cloned;
-	if (defined wantarray)
-	{
-		$cloned=clone_if($orig);
+	eval {
+		if (defined wantarray)
+		{
+			$cloned = clone_if($orig, \%refs);
+		}
+		else
+		{
+			$cloned = undef;
+		}
+		return $cloned;		
 	}
-	else
-	{
-		$cloned=undef;
-	}
-	return $cloned;
 }
 
 1;
