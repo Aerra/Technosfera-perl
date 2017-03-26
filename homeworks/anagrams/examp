@@ -1,0 +1,5 @@
+use utf8;
+use Text::Levenshtein qw(distance);
+
+print distance("ток", "кот");
+print "\n";

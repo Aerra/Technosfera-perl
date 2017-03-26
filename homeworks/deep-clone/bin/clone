@@ -21,7 +21,9 @@ use Data::Dumper;
 local $Data::Dumper::Indent = 0;
 
 #replace $orig value with your structure
-my $orig   = undef; 
+my @mas=( { a => 1, b => 2}, { c => 3, d => 4 } );
+my %hash=("1" => 12, "2" => \@mas);
+my $orig   = [ { a => 1, b => 2}, { c => 3, d => 4 } ]; 
 my $cloned = DeepClone::clone($orig);
 
 say "ORIGINAL ", Dumper($orig);
