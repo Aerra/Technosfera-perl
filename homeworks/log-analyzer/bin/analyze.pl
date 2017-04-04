@@ -59,7 +59,7 @@ sub parse_file {
         #$4 status code
         #$5 byte
         #$6 k
-        if ($1 and $3 and $6 and $4 and $5)
+        if ($1)
         {
             ${$hash_ip{$1}}[0]+=1;
             ${$hash_ip{$all}}[0]+=1;
@@ -132,8 +132,15 @@ sub report {
     while ($i<21)
     {
         printf "$arr[$i]";
-        printf "\t$arr[$i+1][0]";
-        printf "\t%.2f", (($arr[$i+1])->[0])/($arr[$i+1][4]);
+        printf "\t%d", ($arr[$i+1])->[0];
+        if ($arr[$i+1][4])
+        {
+            printf "\t%.2f", (($arr[$i+1])->[0])/($arr[$i+1][4]);
+        }
+        else 
+        {
+            printf "\t0";
+        }
         printf "\t%.0f", (($arr[$i+1])->[1])/1024;
         for (@arr_code)
         {
