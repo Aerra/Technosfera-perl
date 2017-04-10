@@ -4,6 +4,7 @@ use strict;
 use warnings;
 our $VERSION = 1.0;
 use DDP;
+use POSIX;
 
 my $filepath = $ARGV[0];
 die "USAGE:\n$0 <log-file>\n"  unless $filepath;
@@ -52,25 +53,32 @@ sub parse_file {
         # you can put your code here
         # $log_line contains line from log file
 
-        $log_line =~ /^((\d+\.){3}\d+)\s+\[([^:]*:\d+:\d+)[^\]]*\]\s+"[^"]*"\s+(\d+)\s+(\d+)\s+"[^"]*"\s+"[^"]*"\s+"(\d+.\d+)"$/;
+        #die $log_line unless 
+        $log_line =~ /^((\d+\.){3}\d+)\s+\[([^:]*:\d+:\d+)[^\]]*\]\s+"[^"]*"\s+(\d+)\s+(\d+)\s+"[^"]*"\s+"[^"]*"\s+"(\d+.\d+|-)"$/; #or $.==1714;
         #                ip                    [ все, кроме ]
         #$1 ip
         #$3 time min
         #$4 status code
         #$5 byte
         #$6 k
+        my $k=$6;
         if ($1)
         {
+        	if ($k eq '-')
+        	{
+        		$k=1;
+        	}
             ${$hash_ip{$1}}[0]+=1;
             ${$hash_ip{$all}}[0]+=1;
             if ($4 == 200)
             {
-                ${$hash_ip{$1}}[1]+=$5*$6;    
-                ${$hash_ip{$all}}[1]+=$6*$5;
+                ${$hash_ip{$1}}[1]+=$5*$k;    
+                ${$hash_ip{$all}}[1]+=$5*$k;
             }
             else
             {
                 ${$hash_ip{$1}}[1]+=0;
+                ${$hash_ip{$all}}[1]+=0;
             }
             ${$hash_ip{$1}}[2]->{$4}+=$5;
             ${$hash_ip{$all}}[2]->{$4}+=$5;
@@ -121,7 +129,7 @@ sub report {
         push @arr, ($result)->{$key1};
         delete $result->{$key1};
     }
-    #p @arr;
+    p @arr;
     printf ("IP\tcount\tavg\tdata");
     for (@arr_code)
     {
@@ -141,12 +149,14 @@ sub report {
         {
             printf "\t0";
         }
-        printf "\t%.0f", (($arr[$i+1])->[1])/1024;
+        my $del = floor ((($arr[$i+1])->[1])/1024);
+        printf "\t%d", $del; #(($arr[$i+1])->[1])/1024;
         for (@arr_code)
         {
             if ($arr[$i+1][2]->{$_})
             {
-                printf "\t%.0f", ($arr[$i+1]->[2])->{$_}/1024;
+            	$del = floor (($arr[$i+1]->[2])->{$_}/1024);
+                printf "\t%d", $del;#($arr[$i+1]->[2])->{$_}/1024;
             }
             else
             {
