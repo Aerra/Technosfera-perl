@@ -20,18 +20,7 @@ sub parse_file {
     # you can put your code here
     my %hash_ip;
     my @new_arr_1=();
-    my %hash_stat_1=(
-                    200 => 0,
-                    301 => 0,
-                    302 => 0,
-                    400 => 0,
-                    403 => 0,
-                    404 => 0,
-                    408 => 0,
-                    414 => 0,
-                    499 => 0,
-                    500 => 0
-    );
+    my %hash_stat_1=();
     my %hash_time_1=();
     $new_arr_1[0]=0;
     $new_arr_1[1]=0;
@@ -98,9 +87,6 @@ sub parse_file {
         }
     }
     close $fd;
-
-    #p %hash_ip;
-
     $result=\%hash_ip;
     # you can put your code here
     return $result;
@@ -108,14 +94,25 @@ sub parse_file {
 
 sub report {
     my $result = shift;
-
     # you can put your code here
-    my @arr_code=(200, 301, 302, 400, 403, 404, 408, 414, 499, 500);
-    #p @arr_code;
+    my @arr_code=();
+    foreach my $key (keys %{$result->{'total'}[2]})
+    {
+        push @arr_code, $key;
+    }
+    @arr_code = sort @arr_code;
     my @arr=();
     my $key1=0;
-    for (1..11)
+    push @arr, 'total';
+    push @arr, ($result)->{'total'};
+    delete $result->{'total'};
+    my $size = scalar keys %{$result};
+    if ($size > 11)
     {
+        $size = 11;
+    }
+    for (1..$size)
+    {   
         my $value1=0;
         while (my($key,$value)=each (%{$result}))
         {
@@ -129,7 +126,6 @@ sub report {
         push @arr, ($result)->{$key1};
         delete $result->{$key1};
     }
-    p @arr;
     printf ("IP\tcount\tavg\tdata");
     for (@arr_code)
     {
@@ -137,7 +133,7 @@ sub report {
     }
     printf "\n";
     my $i=0;
-    while ($i<21)
+    while ($i<$#arr)
     {
         printf "$arr[$i]";
         printf "\t%d", ($arr[$i+1])->[0];
@@ -150,13 +146,13 @@ sub report {
             printf "\t0";
         }
         my $del = floor ((($arr[$i+1])->[1])/1024);
-        printf "\t%d", $del; #(($arr[$i+1])->[1])/1024;
+        printf "\t%d", $del;
         for (@arr_code)
         {
-            if ($arr[$i+1][2]->{$_})
+            if (defined $arr[$i+1][2]->{$_})
             {
             	$del = floor (($arr[$i+1]->[2])->{$_}/1024);
-                printf "\t%d", $del;#($arr[$i+1]->[2])->{$_}/1024;
+                printf "\t%d", $del;
             }
             else
             {
