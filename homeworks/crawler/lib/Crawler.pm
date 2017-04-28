@@ -7,6 +7,7 @@ use warnings;
 use AnyEvent::HTTP;
 use Web::Query;
 use URI;
+$AnyEvent::HTTP::MAX_PER_HOST = 100;
 
 =encoding UTF8
 
@@ -35,18 +36,80 @@ $total_size - суммарный размер собранных ссылок в
 @top10_list - top-10 страниц отсортированный по размеру.
 
 =cut
+#sub craw {
+#
+#}
+
+#
+
 
 sub run {
     my ($start_page, $parallel_factor) = @_;
     $start_page or die "You must setup url parameter";
     $parallel_factor or die "You must setup parallel factor > 0";
-
     my $total_size = 0;
-    my @top10_list;
+    my @top10_listkey;
 
     #............
     #Код crawler-а
     #............
+
+    my @url = ($start_page);
+    my $maxurl=1000;
+    my $ll;
+    my %visit;
+    my $cv = AE::cv;
+    $cv->begin;
+   	my $next; 
+   	$next = sub {
+   		if (keys(%visit)>$maxurl or !(@url))
+   		{
+   			$cv->send;
+   			return;
+   		}
+   		my $page = shift @url;
+   		$cv -> begin;
+   		http_head
+   		$page,
+   		sub {
+   			($data, $headers)=@_;
+   			if ($headers->{Status} =~ /^2/) {
+   				if ($headers->{"content-type"} =~ "text/html")
+   				{
+   					cv->begin;
+   					http_get
+   					$page,
+   					sub {
+   						$data = shift; #web querry    great suspender положить туда дата в нью (в файнд положить а как ссылка на шрефы),  селект as_html
+   						$vist{$page}=length $data;
+   						while (my $log_line = <$data>)
+   						{
+   							# здесь ищи href /src
+   							$log_line ~= /(?:href|src)+="((https?:\/\/)?([\w\.]+)*\.?([a-z]{2,6}\.?)?([\/\w\.\-=\?]*)*\/?|#)"/;
+   							$ll=$1;
+   							next if (ref $ll eq "URI::_foreign" or $ll eq "#");
+   							my $s = $ll -> as_iri;
+   							push @url, $s if ($s =~ "^$start_page" && !($visit{$s}));
+   						}
+   						#здесь как-то преобразовать из относительных в абсолютные, распарсить new_abs
+
+   						my $count = @url < $parallel_factor ? @url : $parallel_factor;
+   						next->() for 1..$count;
+   						cv->end;
+   						return;
+   					};
+
+   				}
+   			}
+   			else {
+   				print "error, $headers->{Status} $hdr->{Reason}\n";
+   			}
+   		}
+   	};
+   	$next -> ();
+    $cv->end;
+    $cv->recv;
+    
 
     return $total_size, @top10_list;
 }
