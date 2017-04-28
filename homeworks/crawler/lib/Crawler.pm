@@ -7,6 +7,7 @@ use warnings;
 use AnyEvent::HTTP;
 use Web::Query;
 use URI;
+use Data::Dumper;
 $AnyEvent::HTTP::MAX_PER_HOST = 100;
 
 =encoding UTF8
@@ -53,7 +54,9 @@ sub run {
     #............
     #Код crawler-а
     #............
-
+    my $data;
+    my $headers;
+    my $wq;
     my @url = ($start_page);
     my $maxurl=1000;
     my $ll;
@@ -64,8 +67,7 @@ sub run {
    	$next = sub {
    		if (keys(%visit)>$maxurl or !(@url))
    		{
-   			$cv->send;
-   			return;
+   			cv->end;
    		}
    		my $page = shift @url;
    		$cv -> begin;
@@ -82,13 +84,19 @@ sub run {
    					sub {
    						$data = shift; #web querry    great suspender положить туда дата в нью (в файнд положить а как ссылка на шрефы),  селект as_html
    						$vist{$page}=length $data;
+   						$wq = Web::Query -> new ($data);
+   						$wq ->find ('a') -> 
    						while (my $log_line = <$data>)
    						{
    							# здесь ищи href /src
-   							$log_line ~= /(?:href|src)+="((https?:\/\/)?([\w\.]+)*\.?([a-z]{2,6}\.?)?([\/\w\.\-=\?]*)*\/?|#)"/;
-   							$ll=$1;
-   							next if (ref $ll eq "URI::_foreign" or $ll eq "#");
-   							my $s = $ll -> as_iri;
+   							#$log_line ~= /(?:href|src)+="((https?:\/\/)?([\w\.]+)*\.?([a-z]{2,6}\.?)?([\/\w\.\-=\?]*)*\/?|#)"/;
+   							#$ll=$1;
+   							#next if (ref $ll eq "URI::_foreign" or $ll eq "#");
+   							#my $s = $ll -> as_iri;
+
+
+
+
    							push @url, $s if ($s =~ "^$start_page" && !($visit{$s}));
    						}
    						#здесь как-то преобразовать из относительных в абсолютные, распарсить new_abs
