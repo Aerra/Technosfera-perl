@@ -9,15 +9,16 @@ use utf8;
 #...
 $SIG{INT} = \&intwork;
 
-
+my $flag=0;
 our $all=0;
 our $len=0;
-print "Get ready\n";
 my $filename;
 GetOptions("file=s" => \$filename);
 #p $filename;
 open (our $fh, '>', "$filename") or die "Can't open this file!\n";
+print "Get ready\n";
 while (<STDIN>) {
+		$flag=0;
 		$all+=1;
 		$len=$len + length($_)-1;
 		print {$fh} $_;
@@ -31,18 +32,28 @@ while (<STDIN>) {
 	}
 
 sub intwork {
+	$flag=1;
 	select (STDERR);
 	print "Double Ctrl+C for exit";
 	$SIG{INT} = \&intwork1;
 }
 
 sub intwork1 {
-	close ($fh);
+	if ($flag == 0) 
+	{ 
+		select (STDERR);
+		print "Double Ctrl+C for exit";
+		$SIG{INT} = \&intwork;
+	}
+	else
+	{
+		close ($fh);
+		select (STDOUT);
+		printf ("$len $all %.0f", $len/$all);
+		exit ();
+	}
 	#print "\n$len ";
 	#print "$all ";
-	select (STDOUT);
-	printf ("$len $all %.0f", $len/$all);
-	exit ();
 }
 
 1;
