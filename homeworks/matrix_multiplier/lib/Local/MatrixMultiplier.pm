@@ -104,67 +104,70 @@ sub mult {
    				$k++;
    			}
    			close ($r1);	
-   			waitpid($pid,0);
-   		}
-   		else
-   		{
-   			die "Can't fork!\n" unless defined $pid;
-   			close ($w);
-   			my $count1;
-   			my @cxy;
-   			while (<$r>)
-   			{
-   				chomp;
-   				push @cxy, $_;
-   			}
-   			close ($r);
-   			$count1 = $cxy[0];
-   			$x=$cxy[1];
-   			$y=$cxy[2];
-   			my @res1;
-   			while ($count1 > 0)
-   			{
-   				$count1=$count1-1;
-   				my $str=multiply_m ($mat_a, $mat_b, $x, $y, $dim-1);
-   				if ($y==$dim-1)
-   				{
-   					$y=0;
-   					$x++;
-   				}
-   				else 
-   				{
-   					$y++;
-   				}
-   				push @res1, $str;
-   			}
-   			close ($r1);
-   			foreach my $i (@res1)
-   			{
-   				print $w1 $i, "\n";
-   			}
-   			close ($w1);
-   			exit;
-   		}
+      }
+      else
+      {
+        die "Can't fork!\n" unless defined $pid;
+        close ($w);
+        my $count1;
+        my @cxy;
+        while (<$r>)
+        {
+          chomp;
+          push @cxy, $_;
+        }
+        close ($r);
+        $count1 = $cxy[0];
+        $x=$cxy[1];
+        $y=$cxy[2];
+        my @res1;
+        while ($count1 > 0)
+        {
+          $count1=$count1-1;
+          my $str=multiply_m ($mat_a, $mat_b, $x, $y, $dim-1);
+          if ($y==$dim-1)
+          {
+            $y=0;
+            $x++;
+          }
+          else 
+          {
+            $y++;
+          }
+          push @res1, $str;
+        }
+        close ($r1);
+        foreach my $i (@res1)
+        {
+          print $w1 $i, "\n";
+        }
+        close ($w1);
+        exit;
+      }
     }
-   	$x=0;
-   	$y=0;
-   	foreach my $i (0..$max_child-1)
-   	{
-   		foreach my $j (0..$nums[$i]-1)
-   		{
-   			$res[$x][$y]=$res2[$i][$j];
-   			if ($y==$dim-1)
-   			{
-   				$y=0;
-   				$x++;
-   			}
-   			else 
-   			{
-   				$y++;
-   			}
-   		}
-   	}
-   	$res=\@res;
+    $x=0;
+    $y=0;
+    foreach my $i (0..$max_child-1)
+    {
+      foreach my $j (0..$nums[$i]-1)
+      {
+        $res[$x][$y]=$res2[$i][$j];
+        if ($y==$dim-1)
+        {
+          $y=0;
+          $x++;
+        }
+        else 
+        {
+          $y++;
+        }
+      }
+    }
+    foreach $pid (@pids)
+    {
+   		waitpid($pid,0);
+    }
+    $res=\@res;
     return $res;
 }
 1;
