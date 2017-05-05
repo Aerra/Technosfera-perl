@@ -1,9 +1,11 @@
-[
-	"DBI::mysql::database=socialnet;host=localhost;port=5000",
-	"anna",
-	"pass",
-	{
-		"RaiseError" => 1,
-		"mysql_enable_utf8" => 1
-	}
-]
+---
+DBI:
+-driver: 'mysql'
+-database : 'socialnet'
+-host : 'localhost'
+-port : 3306
+-username : 'anna'
+-password : 'pass'
+dbi_params:
+-RaiseError : 1
+-mysql_enable_utf8 : 1

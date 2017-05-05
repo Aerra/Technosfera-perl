@@ -4,12 +4,12 @@ use strict;
 use warnings;
 use FindBin;
 use IO::Uncompress::Unzip;
-use Expoter 'import';
+use Exporter 'import';
 
 sub install_user {
 	my $bd=shift;
 	my $zip = new IO::Uncompress::Unzip "$FindBin::Bin/../etc/user.zip" or die "can't unzip;(\n";
-	my $sth = $bd->prepare ("INSERT INTO users (id, first_name, $last_name) VALUES (?,?,?)");
+	my $sth = $bd->prepare ("INSERT INTO users (id, first_name, last_name) VALUES (?,?,?)");
 	while (<$zip>)
 	{
 		chomp;

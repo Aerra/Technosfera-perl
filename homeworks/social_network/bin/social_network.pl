@@ -29,17 +29,17 @@ $bd->disconnect();
 
 if ($command eq 'friends')
 {
-	die "you must have two users!\n" if ($#@users != 1);
+	die "you must have two users!\n" if ($#users != 1);
 	print JSON->new->utf8->encode(friendXY(@users));
 }
 elsif ($command eq 'nofriends')
 {
-	die "no parametres!\n" if (defined @users[0]);
+	die "no parametres!\n" if ($users[0]);
 	print JSON->new->utf8->encode(nofrinds());
 }
 elsif ($command eq 'num_handshakes')
 {
-	die "you must have two users!\n" if ($#@users != 1);
+	die "you must have two users!\n" if ($#users != 1);
 	print JSON->new->utf8->encode(handshakers(@users));
 }
 else 

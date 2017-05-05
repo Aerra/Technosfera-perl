@@ -39,34 +39,34 @@ sub new {
 	$sth -> execute ($id);
 	my $user = $sth -> fetchrow_hashref();
 	my @friends = map {$_->[2]} @{$sth->fetchall_arrayref()};
-	$self{id} = $id;
-	$self{first_name} = $user{first_name};
-	$self{last_name} = $user{last_name};
-	$self{friends} = \@friends;
+	($self)->{id} = $id;
+	($self)->{first_name} = ($user)->{first_name};
+	($self)->{last_name} = ($user)->{last_name};
+	($self)->{friends} = \@friends;
 	return $self;
 }
 
 sub get_name {
 	my $self = shift;
-	return $self{first_name}." ".$self{last_name};
+	return ($self)->{first_name}." ".($self)->{last_name};
 }
 
 sub get_friends {
 	my $self = shift;
-	return $self{friends};
+	return ($self)->{friends};
 }
 
 sub get_id {
 	my $self = shift;
 	my %hash;
-	$hash{id}=$self{id};
+	$hash{id}=($self)->{id};
 	$hash{name}=$self->get_name();
 	return \%hash;
 }
 
 sub no_friends {
 	my $self = shift;
-	return 1 unless (scalar @{$self{friends}});
+	return 1 unless (scalar @{($self)->{friends}});
 	return 0;
 }
 

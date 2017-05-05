@@ -25,8 +25,6 @@ our $VERSION = '1.00';
 
 =cut
 
-
-
 sub friendsXY {
 	my $XX = shift;
 	my $YY = shift;
@@ -73,12 +71,12 @@ sub handshakers {
 		die ("No friends(\n");
 	}
 	my %handshakers = ($XX => 1);
-	while !(defined $handshakers{$YY})
+	while (!defined $handshakers{$YY})
 	{
 		my @friends = ();
-		foreach (keys %handshakers)	
+		foreach my $id (keys %handshakers)	
 		{
-			push @friends, Local::Schema::User->new($_)->get_friends();
+			push @friends, Local::Schema::User->new($id)->get_friends();
 		}
 		foreach my $i (@friends)
 		{
@@ -92,6 +90,6 @@ sub handshakers {
 	return {"handshakers" => $handshakers};
 }
 
-@EXPORT = qw(friendsXY, nofriends, handshakers);
+our @EXPORT = qw(friendsXY, nofriends, handshakers);
 
 1;
