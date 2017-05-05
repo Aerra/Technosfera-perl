@@ -2,3 +2,51 @@
 
 use strict;
 use warnings;
+use DDP;
+use DBI;
+use Getopt::Long;
+#use JSON::XS;
+use JSON;
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use Local::SocialNetwork;
+use Local::ConnectSN;
+use Local::Convert;
+use Local::Schema::User;
+
+
+my $command = shift;
+die "it is not a command!\n" unless (defined $command);
+my @users;
+GetOptions("user=i", \@users);
+
+
+my $bd = base_class();
+install_user($bd);
+install_relation($bd);
+$bd->disconnect();
+
+
+if ($command eq 'friends')
+{
+	die "you must have two users!\n" if ($#@users != 1);
+	print JSON->new->utf8->encode(friendXY(@users));
+}
+elsif ($command eq 'nofriends')
+{
+	die "no parametres!\n" if (defined @users[0]);
+	print JSON->new->utf8->encode(nofrinds());
+}
+elsif ($command eq 'num_handshakes')
+{
+	die "you must have two users!\n" if ($#@users != 1);
+	print JSON->new->utf8->encode(handshakers(@users));
+}
+else 
+{
+	die "wrong command!\n";
+}
+
+
+
+1;

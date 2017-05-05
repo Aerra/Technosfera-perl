@@ -1,0 +1,9 @@
+[
+	"DBI::mysql::database=socialnet;host=localhost;port=5000",
+	"anna",
+	"pass",
+	{
+		"RaiseError" => 1,
+		"mysql_enable_utf8" => 1
+	}
+]
