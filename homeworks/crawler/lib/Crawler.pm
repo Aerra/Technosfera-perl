@@ -105,7 +105,7 @@ sub run {
    				print "error, $headers->{Status} $headers->{Reason}\n";
    				$cv->end;
    			}
-   		}
+   		};
    	};
    	$next -> ();
     $cv->end;
