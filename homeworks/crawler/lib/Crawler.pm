@@ -91,15 +91,15 @@ sub run {
    						$wq = Web::Query -> new ($data);
    						$wq ->find ('a') -> each (sub { my $k=$_[1]->attr('href'); 
    										my $uri=URI->new_abs($k,$page);
-   										push @url, $uri unless (defined $visit{$uri});});
+   										push @url, $uri unless (defined $visit{$uri} && !($uri=~'^$start_page'));});
    						my $count = $#url+1 < $parallel_factor ? $#url+1 : $parallel_factor;
    						$next->() while ($ll<=$count); 
    						$ll--;
    						$cv->end;
    						return;
    					};
-
    				}
+   				$cv->end;
    			}
    			else {
    				print "error, $headers->{Status} $headers->{Reason}\n";
