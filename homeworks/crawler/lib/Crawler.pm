@@ -90,8 +90,9 @@ sub run {
    						$visit{$page}=length $data;
    						$wq = Web::Query -> new ($data);
    						$wq ->find ('a') -> each (sub { my $k=$_[1]->attr('href'); 
-   										my $uri=URI->new_abs($k,$page);
-   										push @url, $uri unless (defined $visit{$uri} && !($uri=~'^$start_page'));});
+   										my $base= URI->new($page);
+   										my $uri=URI->new_abs($k,$base);
+   										push @url, $uri unless (defined $visit{$uri} && !($uri=~"^$start_page"));});
    						my $count = $#url+1 < $parallel_factor ? $#url+1 : $parallel_factor;
    						$next->() while ($ll<=$count); 
    						$ll--;
