@@ -44,7 +44,10 @@ $total_size - суммарный размер собранных ссылок в
 #}
 
 #
-
+use constant URL => 'https://github.com/Nikolo/Technosfera-perl/tree/anosov-crawler/';
+my ($total_size, @top10) = run(URL, 100);
+p @top10;
+p $total_size;
 
 sub run {
     my ($start_page, $parallel_factor) = @_;
@@ -65,9 +68,11 @@ sub run {
     $cv->begin;
    	my $next; 
    	$next = sub {
+   		#my $j=scalar keys(%visit);
+   		#printf "keys: $j\n";
    		if (scalar keys(%visit) >= $maxurl or !(@url))
    		{
-   			$cv->end;
+   			$cv->send;
    			return;
    		}
    		$ll++;
@@ -89,17 +94,25 @@ sub run {
    						$wq = Web::Query -> new ($data);
    						if ($wq)
    						{
-   							$wq ->find('a') -> each (sub { my $k=$_[1]->attr('href'); 
+   							#printf "Hello! $page \n";
+   							$wq ->find('a') -> each (sub { my $k=$_[1]->attr('href');
+   											if ($k =~ "([^#]*)#") 
+   											{
+   												$k=$1;
+   											}
    											my $base= URI->new($page);
    											my $uri=URI->new_abs($k,$base);
-   											push @url, $uri unless (defined $visit{$uri} && !($uri=~"^$start_page"));});
+   											push @url, $uri unless (defined $visit{$uri} or !($uri=~"^$start_page"));});
    						}
    						my $count = $#url+1 < $parallel_factor ? $#url+1 : $parallel_factor;
+   						#printf "LL: $ll\n";
    						$next->() while ($ll<=$count); 
    						$ll--;
    						$cv->end;
    						return;
    					};
+   					#printf "Go out!\n";
+   					#p @url;
    				}
    				$cv->end;
    			}
