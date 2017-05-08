@@ -67,7 +67,7 @@ sub run {
     $cv->begin;
    	my $next; 
    	$next = sub {
-   		if (scalar keys(%visit)>$maxurl or !(@url))
+   		if (scalar keys(%visit) >= $maxurl or !(@url))
    		{
    			$cv->end;
    			return;
