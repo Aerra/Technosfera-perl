@@ -110,14 +110,12 @@ sub run {
    	$next -> ();
     $cv->end;
     $cv->recv;
-    my $size=0;
-    my @list;
     my $count=scalar keys %visit;
     if ($count <= $maxurl)
     {
     	for my $key (keys %visit)
     	{
-    		$size+=$visit{$key};
+    		$total_size+=$visit{$key};
     	}
     }
     else 
@@ -128,11 +126,11 @@ sub run {
     	}
     	for my $key (keys %visit)
     	{
-    		$size+=$visit{$key};
+    		$total_size+=$visit{$key};
     	}
     }
-    @list=(sort {$visit{$b} <=> $visit{$a}} keys %visit) [0..9];
-    return $size, @list;
+    @top10_listkey=(sort {$visit{$b} <=> $visit{$a}} keys %visit) [0..9];
+    return $total_size, @top10_listkey;
 }
 
 1;
