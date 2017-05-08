@@ -72,7 +72,7 @@ sub run {
    		#printf "keys: $j\n";
    		if (scalar keys(%visit) >= $maxurl or !(@url))
    		{
-   			$cv->send;
+   			$cv->end;
    			return;
    		}
    		$ll++;
