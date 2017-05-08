@@ -44,10 +44,10 @@ $total_size - суммарный размер собранных ссылок в
 #}
 
 #
-use constant URL => 'https://github.com/Nikolo/Technosfera-perl/tree/anosov-crawler/';
-my ($total_size, @top10) = run(URL, 100);
-p @top10;
-p $total_size;
+#use constant URL => 'https://github.com/Nikolo/Technosfera-perl/tree/anosov-crawler/';
+#my ($total_size, @top10) = run(URL, 100);
+#p @top10;
+#p $total_size;
 
 sub run {
     my ($start_page, $parallel_factor) = @_;
