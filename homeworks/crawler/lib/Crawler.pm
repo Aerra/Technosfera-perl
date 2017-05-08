@@ -8,6 +8,8 @@ use AnyEvent::HTTP;
 use Web::Query;
 use URI;
 use Data::Dumper;
+use DDP;
+use List::Util qw(max);
 $AnyEvent::HTTP::MAX_PER_HOST = 100;
 
 =encoding UTF8
@@ -65,10 +67,12 @@ sub run {
     $cv->begin;
    	my $next; 
    	$next = sub {
-   		if (keys(%visit)>$maxurl or !(@url))
+   		if (scalar keys(%visit)>$maxurl or !(@url))
    		{
-   			cv->end;
+   			$cv->end;
+   			return;
    		}
+   		$ll++;
    		my $page = shift @url;
    		$cv -> begin;
    		http_head
@@ -78,48 +82,57 @@ sub run {
    			if ($headers->{Status} =~ /^2/) {
    				if ($headers->{"content-type"} =~ "text/html")
    				{
-   					cv->begin;
+   					$cv -> begin;
    					http_get
    					$page,
    					sub {
-   						$data = shift; #web querry    great suspender положить туда дата в нью (в файнд положить а как ссылка на шрефы),  селект as_html
-   						$vist{$page}=length $data;
+   						$data = shift;
+   						$visit{$page}=length $data;
    						$wq = Web::Query -> new ($data);
-   						$wq ->find ('a') -> 
-   						while (my $log_line = <$data>)
-   						{
-   							# здесь ищи href /src
-   							#$log_line ~= /(?:href|src)+="((https?:\/\/)?([\w\.]+)*\.?([a-z]{2,6}\.?)?([\/\w\.\-=\?]*)*\/?|#)"/;
-   							#$ll=$1;
-   							#next if (ref $ll eq "URI::_foreign" or $ll eq "#");
-   							#my $s = $ll -> as_iri;
-
-
-
-
-   							push @url, $s if ($s =~ "^$start_page" && !($visit{$s}));
-   						}
-   						#здесь как-то преобразовать из относительных в абсолютные, распарсить new_abs
-
-   						my $count = @url < $parallel_factor ? @url : $parallel_factor;
-   						next->() for 1..$count;
-   						cv->end;
+   						$wq ->find ('a') -> each (sub { my $k=$_[1]->attr('href'); 
+   														my $uri=URI->new_abs($k,$page);
+   														push @url, $uri unless (defined $visit{$uri});});
+   						my $count = $#url+1 < $parallel_factor ? $#url+1 : $parallel_factor;
+   						$next->() while ($ll<=$count); 
+   						$ll--;
+   						$cv->end;
    						return;
    					};
 
    				}
    			}
    			else {
-   				print "error, $headers->{Status} $hdr->{Reason}\n";
+   				print "error, $headers->{Status} $headers->{Reason}\n";
+   				$cv->end;
    			}
    		}
    	};
    	$next -> ();
     $cv->end;
     $cv->recv;
-    
-
-    return $total_size, @top10_list;
+    my $size=0;
+    my @list;
+    my $count=scalar keys %visit;
+    if ($count <= $maxurl)
+    {
+    	for my $key (keys %visit)
+    	{
+    		$size+=$visit{$key};
+    	}
+    }
+    else 
+    {
+    	for my $key ((sort {$visit{$a} <=> $visit{$b}} keys %visit)[1..$count-$maxurl])
+    	{
+    		delete $visit{$key};
+    	}
+    	for my $key (keys %visit)
+    	{
+    		$size+=$visit{$key};
+    	}
+    }
+    @list=(sort {$visit{$b} <=> $visit{$a}} keys %visit) [0..9];
+    return $size, @list;
 }
 
 1;
