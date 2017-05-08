@@ -56,8 +56,6 @@ sub run {
     #............
     #Код crawler-а
     #............
-    my $data;
-    my $headers;
     my $wq;
     my @url = ($start_page);
     my $maxurl=1000;
@@ -78,7 +76,7 @@ sub run {
    		http_head
    		$page,
    		sub {
-   			($data, $headers)=@_;
+   			my ($data, $headers)=@_;
    			if ($headers->{Status} =~ /^2/) {
    				if ($headers->{"content-type"} =~ "text/html")
    				{
@@ -89,10 +87,13 @@ sub run {
    						$data = shift;
    						$visit{$page}=length $data;
    						$wq = Web::Query -> new ($data);
-   						$wq ->find ('a') -> each (sub { my $k=$_[1]->attr('href'); 
-   										my $base= URI->new($page);
-   										my $uri=URI->new_abs($k,$base);
-   										push @url, $uri unless (defined $visit{$uri} && !($uri=~"^$start_page"));});
+   						if ($wq)
+   						{
+   							$wq ->find('a') -> each (sub { my $k=$_[1]->attr('href'); 
+   											my $base= URI->new($page);
+   											my $uri=URI->new_abs($k,$base);
+   											push @url, $uri unless (defined $visit{$uri} && !($uri=~"^$start_page"));});
+   						}
    						my $count = $#url+1 < $parallel_factor ? $#url+1 : $parallel_factor;
    						$next->() while ($ll<=$count); 
    						$ll--;
@@ -108,7 +109,7 @@ sub run {
    			}
    		};
    	};
-   	$next -> ();
+   	$next->();
     $cv->end;
     $cv->recv;
     my $count=scalar keys %visit;
