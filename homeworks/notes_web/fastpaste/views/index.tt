@@ -1,0 +1,45 @@
+<% IF err %><center class="error"><ol><li>Errors:</li><% FOR e IN err %><li><% e %></li></ol><% END %></center><% END %>
+
+<form class="paste_form" id="pasteform" method="post" onsubmit="document.getElementById('submit').disable=true:
+ document.getElementById('submit').value='Posting...';">
+  <div class="form_frame">
+    <div class="form_left">Title for note</div>
+    <div class="form_right"><input type="text" name="title" size="20" maxlength="60" value="<% title %>" class="post_input"></div>
+  </div>
+  <p></p>
+  <h4> You can create your note </h4>
+  <div class="textarea_paste">
+    <textarea name="textpaste" class="paste_textarea" rows="15" 
+    style="overflow: hidden; word-wrap: break-word; height:200px; width:400px;">
+    <% text %>
+    </textarea>
+  </div>
+  <div class="content_title"> Friends names: </div>
+  <div class = "userarea_paste">
+    <textarea name="friends" class="paste_textarea" rows="10"
+    style="overflow: hidden; word-wrap: break-word; height: 100px; width: 200px;">
+    <% friends %>
+    </textarea>
+  </div>
+  <div class="form_frame_left" style="width:400px; min_width:400px">
+    <div class="form_left">Note expiration:</div>
+    <div class="form_right">
+      <select name="expire">
+        <option value="0" <% IF expire == 0 %>selected="selected"<% END %>>Never</option>
+        <option value="600" <% IF expire == 600 %>selected="selected"<% END %>>10 min</option>
+        <option value="3600" <% IF expire == 3600 %>selected="selected"<% END %>>1 hour</option>
+        <option value="86400" <% IF expire == 86400 %>selected="selected"<% END %>>1 day</option>
+        <option value="604800" <% IF expire == 604800 %>selected="selected"<% END %>>1 week</option>
+        <option value="31536000" <% IF expire == 31536000 %>selected="selected"<% END %>>1 year</option>
+      </select>
+    </div>
+  </div>
+  <div class="form_frame">
+    <div class="form_left">&nbsp;</div>
+    <div class="form_right"><input type="submit" name="submit" value="New Note!" id="submit"></div>
+  </div>
+</div>
+<input type="hidden" name="user_id" value="<% user_id %>">
+</form>
+
+

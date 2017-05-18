@@ -1,0 +1,14 @@
+<h1><center>Paste "<% title || 'untitled' %>"</center></h1>
+<div class = "show_paste">
+	<p> <center> <% create_time %> </center> </p>
+	<ol>
+	<% FOR t IN text %> <li class="li_paste"><div class="single_line"><% t %></div></li><% END %>
+	</ol>
+</div>
+<h3> Raw data </h3>
+<div class="textarea_border">
+	<textarea name="textpaste" class="paste_textarea" rows="15" 
+	style="overflow: hidden; word-wrap: break-word; height:200px; 
+	width:400px;"><% raw %></textarea>
+	<input type="hidden" name="user_id" value="<% user_id %>">
+</div>
