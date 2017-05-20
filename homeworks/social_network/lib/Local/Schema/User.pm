@@ -8,26 +8,23 @@ use DDP;
 #use Local::Schema::Relation;
 use Local::ConnectSN;
 use utf8;
-#use base qw(DBIx::Class::Core);
+use base qw(DBIx::Class::Core);
 
-#__PACKAGE__->table('users');
-#__PACKAGE__->add_columns(
-#	id => {
-#		data_type => 'integer',
-#		is_auto_increment => 1,
-#	},
-#	first_name => {
-#		data_type => 'varchar',
-#		size => 64,
-#	},
-#	last_name => {
-#		data_type => 'varchar',
-#		size => 64,
-#	}
-#
-#
-#);
-#__PACKAGE__->set_primary_key('id');
+__PACKAGE__->table('users');
+__PACKAGE__->add_columns(
+	id => {
+		data_type => 'integer',
+	},
+	first_name => {
+		data_type => 'varchar',
+		size => 255,
+	},
+	last_name => {
+		data_type => 'varchar',
+		size => 255,
+	}
+) charset utf8;
+__PACKAGE__->set_primary_key('id');
 
 
 sub new {
