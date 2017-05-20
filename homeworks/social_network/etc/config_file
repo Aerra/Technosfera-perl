@@ -1,10 +1,10 @@
 ---
-DBI:
+:
 -driver: 'mysql'
--database : 'socialnet'
+-database : 'social_net'
 -host : 'localhost'
 -port : 3306
--username : 'anna'
+-username : 'asya'
 -password : 'pass'
 dbi_params:
 -RaiseError : 1

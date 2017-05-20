@@ -1,0 +1,6 @@
+db:
+  dsn: "DBI:mysql:database=social_net;host=localhost;port=5000"
+  user: asya
+  password: pass
+  args:
+    mysql_enable_utf8 : 1
