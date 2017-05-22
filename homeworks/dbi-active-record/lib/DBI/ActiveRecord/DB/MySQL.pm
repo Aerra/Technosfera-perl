@@ -1,4 +1,4 @@
-package DBI::ActiveRecord::DB::SQLite;
+package DBI::ActiveRecord::DB::MySQL;
 use Mouse;
 extends 'DBI::ActiveRecord::DB';
 
@@ -12,9 +12,10 @@ C<DBI::ActiveRecord::DB::SQLite> - базовый класс-адаптер дл
 
 =head1 DESCRIPTION
 
-Данный класс, реализует специфические методы, для работы с БД SQLite.
+Данный класс, реализует специфические методы для работы с БД SQLite.
 
-Если вам требуется использовать SQLite для своих ActiveRecord объектов, то следует отнаследоваться от данного класса, и определить в наследнике метод C<_build_connection_params>.
+Если вам требуется использовать SQLite для своих ActiveRecord объектов, 
+то следует отнаследоваться от данного класса и определить в наследнике метод C<_build_connection_params>.
 
 =head1 PRIVATE METHODS
 
@@ -22,7 +23,10 @@ C<DBI::ActiveRecord::DB::SQLite> - базовый класс-адаптер дл
 
 Метод для непосредственной выборки данных из БД.
 
-Выбирается список полей C<$fields> из таблицы C<$table> по ключевому полю C<$key_field>, которое принимает значения C<$keys>. Если ключевое поле уникальное, должен быть передан флаг C<$is_uniq>. Иначе требуется передать лимит выборки C<$limit>.
+Выбирается список полей C<$fields> из таблицы C<$table> по ключевому полю C<$key_field>, 
+которое принимает значения C<$keys>. 
+Если ключевое поле уникальное, должен быть передан флаг C<$is_uniq>. 
+Иначе требуется передать лимит выборки C<$limit>.
 
 =cut
 
@@ -62,7 +66,8 @@ sub _select {
 
 Метод для непосредственной вставки данных в БД.
 
-Данные для полей C<$fields> со значениями C<$values> вставляются в таблицу C<$table>. Если первичный ключ автоинкрементальный, то его имя должно быть передано в параметре C<$autoinc_field>.
+Данные для полей C<$fields> со значениями C<$values> вставляются в таблицу C<$table>. 
+Если первичный ключ автоинкрементальный, то его имя должно быть передано в параметре C<$autoinc_field>.
 
 =cut
 
@@ -90,15 +95,40 @@ sub _insert {
 
 Метод для непосредственного обновления данных в БД.
 
-Данные для полей C<$fields> обновляются значениями C<$values> в таблице C<$table>. Обновляется данные по первичному ключу C<$key_field> со значением C<$key_value>.
+Данные для полей C<$fields> обновляются значениями C<$values> в таблице C<$table>. 
+Обновляются данные по первичному ключу C<$key_field> со значением C<$key_value>.
 
 =cut
+
+sub _update {
+    my ($self, $table, $key_field, $key_value, $fields, $values)=@_;
+
+    my $dbh = $self->connection;
+
+    my $fields_str = join ", ", @$fields;
+    push @$values, $key_value;
+    my $placeholders = join ", ", map { "$_ = ?" } @$fields;
+
+    $dbh->begin_work;
+
+    if ($dbh->do("UPDATE $table SET $placeholders WHERE $key_field= ? ", {}, @$values))
+    {
+        $dbh->commit;
+        return 1;
+    }
+    else
+    {
+        $dbh->rollback;
+        confess "can't do update request!";
+    }
+
+}
 
 =head2 _delete($table, $key_field, $key_value)
 
 Метод для непосредственного удаления данных из БД.
 
-Данные удаляются из таблицы C<$table> по первичному ключ C<$key_field> со значением C<$key_value>.
+Данные удаляются из таблицы C<$table> по первичному ключу C<$key_field> со значением C<$key_value>.
 
 =cut
 
