@@ -11,7 +11,7 @@ my $bd = base_class();
 install_user($bd);
 install_relation($bd);
 
-printf "Good connect\n";
+#printf "Good connect\n";
 
 $bd->{BD}->disconnect or warn $bd->errstr;
 
