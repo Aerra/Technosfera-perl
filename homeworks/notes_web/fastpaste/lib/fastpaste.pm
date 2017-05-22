@@ -53,7 +53,8 @@ get qr{^/([a-f0-9]{16})$} => sub {
 		my $user = database -> prepare ('SELECT login FROM user where id = (?)');
 		$user -> execute ($id);
 		$user=$user->fetchrow_hashref();
-		unless ($db_res->{friends} =~ /$user->{login}/)
+		unless ($db_res->{friends} =~ /$user->{login}/ && $db_res->{friends} !~ /\w$user->{login}/ 
+			&& $db_res->{friends} !~ /$user->{login}\w/)
 		{
 			return template 'index' => {err => ['Note not found_('], user_id => get_csrf_token()};
 		}
@@ -115,11 +116,11 @@ post '/auth' => sub {
 	}
 	my $ifexist = database -> prepare ('SELECT cast(id as unsigned) as id, login,
 		pass FROM user where login = (?)');
+	my $create = database -> prepare ('INSERT INTO user (login , pass) VALUES ((?),(?))');
 	$ifexist -> execute ($login);
 	my $db_res = $ifexist -> fetchrow_hashref ();
 	unless ($db_res->{id})
 	{
-		my $create = database -> prepare ('INSERT INTO user (login , pass) VALUES ((?),(?))');
 		$create -> execute ($login, $password);
 		$ifexist -> execute ($login);
 		my $db_res = $ifexist -> fetchrow_hashref();
@@ -162,7 +163,7 @@ post '/' => sub {
 	}
 	if ($friends =~ /\W/ and $friends !~ /\s/)
 	{
-		push @err, 'Bad name of friends';
+		push @err, 'Bad name for friends';
 	}
 	if (defined $title)
 	{
